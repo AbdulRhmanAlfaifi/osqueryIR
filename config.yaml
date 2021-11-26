@@ -1,0 +1,209 @@
+artifacts:
+  - authorized_keys:
+      queries: 
+        - 'select * from authorized_keys'
+    description: "Collect authorized_keys artifacts"
+  - process_list:
+      queries: 
+        - 'select * from processes'
+      maps:
+        - name: start_time
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+  - startup_items:
+      queries: 
+        - 'select * from startup_items'
+  - sudoers:
+      queries: 
+        - 'select * from sudoers'
+  - suid_bin:
+      queries: 
+        - 'select * from suid_bin'
+  - system_info:
+      queries: 
+        - 'select * from system_info'
+  - users:
+      queries: 
+        - 'select * from groups join user_groups using (gid) join users using (uid)'
+  - groups:
+      queries: 
+        - 'select * from groups'
+  - apt_sources:
+      queries: 
+        - 'select * from apt_sources'
+  - arp_cache:
+      queries: 
+        - 'select * from arp_cache'
+  - crontab:
+      queries: 
+        - 'select * from crontab'
+  - deb_packages:
+      queries:
+        - 'select * from deb_packages'
+  - file_list:
+      queries:
+        - 'select * from file where path like "/home/%%"'
+        - 'select * from file where path like "/var/%%"'
+        - 'select * from file where path like "/etc/%%"'
+        - 'select * from file where path like "/mnt/%%"'
+        - 'select * from file where path like "/tmp/%%"'
+        - 'select * from file where path like "/opt/%%"'
+        - 'select * from file where path like "/dev/shm/%%"'
+      maps:
+        - name: ctime
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+  # Add more docker queries
+  - docker_containers:
+      queries:
+        - 'select * from docker_containers'
+      maps:
+        - name: created
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+  - etc_hosts:
+      queries:
+        - 'select * from etc_hosts'
+  - interface_addresses:
+      queries:
+        - 'select * from interface_addresses'
+  - iptables:
+      queries:
+        - 'select * from iptables'
+  - last:
+    # Add btmp
+      queries:
+        - 'select * from last'
+      maps:
+        - name: time
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+      maps:
+        - name: time
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+  - listening_ports:
+      queries:
+        - 'select * from listening_ports'
+  - logged_in_users:
+      queries:
+        - 'select * from logged_in_users'
+      maps:
+        - name: time
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+  - mounts:
+      queries:
+        - 'select * from mounts'
+  - os_version:
+      queries:
+        - 'select * from os_version'
+  - process_envs:
+      queries:
+        - 'select * from process_envs'
+  - process_open_files:
+      queries:
+        - 'select * from process_open_files'
+  - routes:
+      queries:
+        - 'select * from routes'  
+  - rpm_packages:
+      queries:
+        - 'select * from rpm_packages'
+      maps:
+        - name: install_time
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+  - selinux_settings:
+      queries:
+        - 'select * from selinux_settings'
+  - shell_history:
+      queries:
+        - 'select uid,time,command,history_file from users join shell_history using (uid)'
+      maps:
+        - name: time
+          map_to: '@timestamp'
+          modifier: epoch_to_iso
+  - ssh_configs:
+      queries:
+        - 'select * from ssh_configs'
+  - uptime:
+      queries:
+        - 'select * from uptime'
+  - yum_sources:
+      queries:
+        - 'select * from yum_sources'
+  - shadow:
+      queries:
+        - 'select * from shadow'
+  - logs:
+      collect:
+        - '/var/log/**'
+        - '/home/*/.vnc/*.log'
+  - auth_log:
+      parse:
+        path: '/var/log/auth.log*'
+        regex: '([A-Z][a-z]{2}[ ]{1,}[0-9]{1,2}[ ]{1,2}[0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([a-zA-Z0-9_\-]+) ([a-zA-Z0-9_\-\]\(\)=\./]+)\[?([0-9]+)?\]?: (.*)'
+        fields:
+          - 'time'
+          - 'hostname'
+          - 'service'
+          - 'pid'
+          - 'msg'
+      maps:
+        - name: time
+          map_to: '@timestamp'
+          modifier: time_without_year_to_iso
+          
+  - secure_log:
+      parse:
+        path: '/var/log/secure*'
+        regex: '([A-Z][a-z]{2}[ ]{1,}[0-9]{1,2}[ ]{1,2}[0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([a-zA-Z0-9_\-]+) ([a-zA-Z0-9_\-\]\(\)=\./]+)\[?([0-9]+)?\]?: (.*)'
+        fields:
+          - 'time'
+          - 'hostname'
+          - 'service'
+          - 'pid'
+          - 'msg'
+      maps:
+        - name: time
+          map_to: '@timestamp'
+          modifier: time_without_year_to_iso
+          
+  - syslog_log:
+      parse:
+        path: '/var/log/syslog*'
+        regex: '([A-Z][a-z]{2}[ ]{1,}[0-9]{1,2}[ ]{1,2}[0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([a-zA-Z0-9_\-]+) ([a-zA-Z0-9_\-\]\(\)=\./]+)\[?([0-9]+)?\]?: (.*)'
+        fields:
+          - 'time'
+          - 'hostname'
+          - 'service'
+          - 'pid'
+          - 'msg'
+      maps:
+        - name: time
+          map_to: '@timestamp'
+          modifier: time_without_year_to_iso
+
+  # - nginx_log:
+  #     parse:
+  #       path: '/dev/shm/gitlab.access*'
+  #       regex: '([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}) - ([^ ]+) \[([0-9]{2}/[a-zA-Z]{3}/[0-9]{4}:[0-9]{2}:[0-9]{2}:[0-9]{2} \+[0-9]{4})\] "([A-Z]+) ([^ ]+) (HTTP/[0-9\.]+)" ([0-9]{3}) ([0-9]+) "(.*)" "(.*)"'
+  #       fields:
+  #         - 'c_ip'
+  #         - 'remote_user'
+  #         - 'time'
+  #         - 'method'
+  #         - 'uri'
+  #         - 'http_prot'
+  #         - 'status_code'
+  #         - 'body_bytes_sent'
+  #         - 'referer'
+  #         - 'user_agent'
+  #     maps:
+  #     - name: time
+  #       map_to: '@timestamp'
+  #       modifier: nginx_time_to_iso
+  - bad_logins:
+      command:
+        - 'lastb'
