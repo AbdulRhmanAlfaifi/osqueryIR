@@ -1,3 +1,4 @@
+# THIS PROJECT IS DEPRICATED, PLEASE USE [FENNEC](https://github.com/AbdulRhmanAlfaifi/Fennec) INSTED
 # osqueryIR
 
 osqueryIR is an artifact collection tool for Linux systems. It provides the following capabilities:
